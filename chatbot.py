@@ -141,6 +141,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
           rr = requests.post(spot_url, headers=headers)
           c.privmsg(self.channel, 'Poll is over and the song has been added to the People\'s choice playlist.')
 
+        elif cmd=="resetpoll":
+        ##tbd, the poll command actually wipes out the old infor for us anyways
+
         #checks playlist that's been created by the poll
         elif cmd=="peopleschoices":
           spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?limit=10'
