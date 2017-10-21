@@ -7,7 +7,7 @@ import json
 import random
 import time
 import pytumblr
-import httplib, urllib, base64
+import httplib, urllib, base64, http.client
 
 #pip install python-twitter, pytumblr, irc
 
@@ -15,6 +15,8 @@ oauth = 'BQCBrKU0SZB9ct-7LmV0mPG2DXIb_uZyBPeo1XYwd1ro2NZgxSsDPYliW5ZkqTzTurqg6cu
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, client_id, token, channel):
+        global MS_data
+        self.MS_data = {"documents":[{"language": "en", "id": "1","text": "We love this trail an"},{"language": "en", "id": "2","text": "We love this trail an"},{"language": "en", "id": "3","text": "We love this trail an"},{"language": "en", "id": "4","text": "We love this trail an"},{"language": "en", "id": "5","text": "We love this trail an"},{"language": "en", "id": "6","text": "We love this trail an"},{"language": "en", "id": "7","text": "We love this trail an"},{"language": "en", "id": "8","text": "We love this trail an"},{"language": "en", "id": "9","text": "We love this trail an"},{"language": "en", "id": "10","text": "We love this trail an"}]}        
         self.client_id = client_id
         self.token = token
         self.channel = '#' + channel
@@ -24,6 +26,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         global skipskip
         global check
         global l
+        global sentiment
+        global MS_data_counter
+        self.MS_data_counter=0
         self.skipskip=0
         #twitter INIT
         consumer_key = 'mj9lFkDA55M8yRfXRotDfiEt6'
@@ -96,6 +101,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
     def on_pubmsg(self, c, e):
         # If a chat message starts with an exclamation point, try to run it as a command
         # print(e.arguments[0])
+        
+
         if e.arguments[0][:1] == '!':
             cmd = e.arguments[0].split(' ')[0][1:]
             print('Received command: ' + cmd)
@@ -108,6 +115,35 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             cmd = 'going'
             #print(cmd)
             self.insideJoke(e, cmd)
+        elif e.arguments[0][:1] !='!':
+            self.MS_data['documents'][self.MS_data_counter]['text']=e.arguments[0]
+            #print(self.MS_data['documents'][self.MS_data_counter]['text'])
+            print(self.MS_data_counter)
+            self.MS_data_counter+=1
+            if(self.MS_data_counter==10):
+                for m in self.MS_data['documents']:
+                    print(m)
+                self.MS_data_counter=0
+                accessKey = '409b2cee17a1476da15cba8863cdd5b1'
+                uri = 'westcentralus.api.cognitive.microsoft.com'
+                path = '/text/analytics/v2.0/sentiment'
+                headers = {'Ocp-Apim-Subscription-Key': accessKey}
+                conn = httplib.HTTPSConnection (uri)
+                body = json.dumps (self.MS_data)
+                conn.request ("POST", path, body, headers)
+                response = conn.getresponse()
+                rr=response.read()
+                #print(rr['document'][0]['score'])
+                datadata=json.loads(rr.decode())
+                print(datadata['documents'][0]['score'])
+                average=0
+                for i in range(0, 10):
+                    average+=datadata['documents'][i]['score']
+                average=average/10
+                conn.close()
+                self.sentiment=average
+
+        
         return
 
     def insideJoke(self, e, cmd):
@@ -117,8 +153,22 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
     def do_command(self, e, cmd):
         c = self.connection
 
+        #retrieves average sentiment over last ten messages
+        if cmd=="sentiment":
+            if self.sentiment >.9:
+                c.privmsg(self.channel, 'The chat is feeling pretty happy.')
+            elif self.sentiment >.75:
+                c.privmsg(self.channel, 'The chat is feeling positive.')
+            elif self.sentiment >.5:
+                c.privmsg(self.channel, 'The chat is feeling neutral.')
+            elif self.sentiment >.35:
+                c.privmsg(self.channel, 'The chat is feeling negative.') 
+            elif self.sentiment >.25:
+                c.privmsg(self.channel, 'The chat is feeling pretty negative.')
+            elif self.sentiment >0:
+                c.privmsg(self.channel, 'The chat is feeling angry.')
         #starts poll
-        if cmd == "poll":
+        elif cmd == "poll":
           self.table={e.arguments[0].split(' ')[1]: 0,
             e.arguments[0].split(' ')[2]:0,}
 
