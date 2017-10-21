@@ -177,7 +177,10 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
             headers = {'Client-ID': self.client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
             r = requests.get(url, headers=headers).json()
-            c.privmsg(self.channel, r['display_name'] + ' is currently playing ' + r['game'])
+            if r['game'] is None:
+                c.privmsg(self.channel, "There is no game currently being played.")
+            else:
+                c.privmsg(self.channel, r['display_name'] + ' is currently playing ' + r['game'])
 
         # Poll the API the get the current status of the stream
         elif cmd == "title":
@@ -187,12 +190,47 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             c.privmsg(self.channel, r['display_name'] + ' channel title is currently ' + r['status'])
 
         # Provide basic information to viewers for specific commands
-        elif cmd == "raffle":
-            message = "This is an example bot, replace this text with your raffle text."
-            c.privmsg(self.channel, message)
         elif cmd == "schedule":
-            message = "This is an example bot, replace this text with your schedule text."            
+            sched = ['Monday: 12PM - 8PM', 'Tuesday: 4PM - 7PM', 'Wednesday: 12PM - 5PM', 'Thursday: OFF', 'Friday: 10AM - 2PM', ]
+            for i in sched:
+                c.privmsg(self.channel, i)
+        
+        # favorite artist
+        elif cmd == "fav_artist":
+            # make request to spotify api
+            url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
+            headers = {'Client-ID': self.client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
+            r = requests.get(url, headers=headers).json()
+            display_name = (r['display_name'])
+            # print("DISPLAY " + display_name)
+            spot_url = 'https://api.spotify.com/v1/me/top/artists?limit=5'
+            headers = {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer BQC9TDED6Er5JOftJyFPliUVFHjlbrdfrfVLqyRoI8kIseYjxcGw047Ms6vD1IB9nenRXp9TwAEB6ZOTqf7dhNb1zITnDTo9N0AJTMeDHlBCWqDXw8aBqxc3a7lTw4l8Nv7CnPmYr20cVsHDDnc',
+            }
+            rr = requests.get(spot_url, headers=headers).json()
+            artist = rr['items'][0]['name']
+            message = display_name + ' favorite artist is ' + artist
             c.privmsg(self.channel, message)
+
+        # get song that is now playing                
+        elif cmd == 'playing':
+            spot_url = 'https://api.spotify.com/v1/me/player/currently-playing'
+            headers = {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer BQBuI97W8oZQRykDe_n_oD2ND1l5MlgtEbBPT__nxtQYmxRBatbydIMX51PqTG8bRQDC4iCu1p39qtkHzQn6iV5EEuaBasNNXjIU5dVJKHQGrJGi-KRLWIkvfslHJZuzN6RN9YHXzhQLcin__dcJ3VUMcza09A',
+            }
+            r = requests.get(spot_url, headers=headers).json()
+            #print(r)
+            song = r['item']['name']
+            artist = r['item']['artists'][0]['name']
+            if r['is_playing'] == True and r['context']['type'] == 'playlist':
+                c.privmsg(self.channel, song + ' - ' + artist + ' is now playing from: ' + r['context']['external_urls']['spotify'])
+            elif r['is_playing'] == True:
+                c.privmsg(self.channel, song + ' - ' + artist + ' is now playing')
+            else:
+                c.privmsg(self.channel, 'There is nothing currently being played.')
+
         elif cmd == "spotify_current":
             # make request to spotify api
             url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
