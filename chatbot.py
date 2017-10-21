@@ -50,7 +50,6 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def do_command(self, e, cmd):
         c = self.connection
-
         # Poll the API to get current game.
         if cmd == "game":
             url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
@@ -72,9 +71,12 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         elif cmd == "raffle":
             message = "This is an example bot, replace this text with your raffle text."
             c.privmsg(self.channel, message)
+        # provides streamer schedule
         elif cmd == "schedule":
-            message = "This is an example bot, replace this text with your schedule text."
-            c.privmsg(self.channel, message)
+            sched = ['Monday: 12PM - 8PM', 'Tuesday: 4PM - 7PM', 'Wednesday: 12PM - 5PM', 'Thursday: OFF', 'Friday: 10AM - 2PM', ]
+            for i in sched:
+                c.privmsg(self.channel, i)
+
         elif cmd == "spotify_current":
             # make request to spotify api
             url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
@@ -82,7 +84,6 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             r = requests.get(url, headers=headers).json()
             display_name = (r['display_name'])
             # print("DISPLAY " + display_name)
-
             spot_url = 'https://api.spotify.com/v1/me/top/artists?limit=5'
             headers = {
                 'Accept': 'application/json',
