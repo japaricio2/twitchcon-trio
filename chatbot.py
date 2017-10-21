@@ -17,7 +17,17 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         self.client_id = client_id
         self.token = token
         self.channel = '#' + channel
-
+        #twitter INIT
+        consumer_key = 'mj9lFkDA55M8yRfXRotDfiEt6'
+        consumer_secret = 'WxVCkxLyDKIFgRW1Jm1TRf3Q7Ec7WS4Or7iSBOf8Fo9Pj4GvE8'
+        access_token_key = '239036830-2NL2MhgnUZo69LRU2SLUECGgrH16EFgXSp9woUIU'
+        access_token_secret = 'I3aEJSFGclBQgNupBpFF9zO6H98wQnghtpgrF4SQxGvUJ'
+        self.api = twitter.Api(
+          consumer_key=consumer_key,
+          consumer_secret=consumer_secret,
+          access_token_key=access_token_key,
+          access_token_secret=access_token_secret
+        )
         # Get the channel id, we will need this for v5 API calls
         url = 'https://api.twitch.tv/kraken/users?login=' + channel
         headers = {'Client-ID': client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
@@ -51,9 +61,13 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def do_command(self, e, cmd):
         c = self.connection
+        # Poll Twitter Api for last tweet (hardcode)
+        if cmd=="tweet":
+            latest_tweet = self.api.GetUserTimeline(screen_name='aspceo')
+            c.privmsg(self.channel, latest_tweet[0].text)
 
         # Poll the API to get current game.
-        if cmd == "game":
+        elif cmd == "game":
             url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
             headers = {'Client-ID': self.client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
             r = requests.get(url, headers=headers).json()
