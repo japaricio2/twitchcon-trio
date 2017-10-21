@@ -3,9 +3,11 @@ import sys
 import irc.bot
 import requests
 import twitter
+import json
 import random
 import time
 import pytumblr
+import httplib, urllib, base64
 
 #pip install python-twitter, pytumblr, irc
 
@@ -20,6 +22,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         global table
         global winner
         global skipskip
+        global check
+        global l
         self.skipskip=0
         #twitter INIT
         consumer_key = 'mj9lFkDA55M8yRfXRotDfiEt6'
@@ -67,6 +71,18 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
           6: 'At tree am',
           7: 'He said \'what in carnation?\'',
       }[x]
+    @staticmethod
+    def emotion(x):
+      return {
+          0: 'angry.',
+          1: 'filled with contempt.',
+          2: 'disgusted.',
+          3: 'afraid.',
+          4: 'happy.',
+          5: 'not feeling too much right now.',
+          6: 'sad.',
+          7: 'surprised.',
+      }[x]
 
     def on_welcome(self, c, e):
         print('Joining ' + self.channel)
@@ -97,7 +113,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
     def insideJoke(self, e, cmd):
         c = self.connection
         c.privmsg(self.channel, "bet you won't.")
-
+    
     def do_command(self, e, cmd):
         c = self.connection
 
@@ -162,7 +178,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 else:
                     c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
                     count += 1
-                    
+
         #skip function
         elif cmd == "skip":
             self.skipskip+=1
@@ -254,8 +270,52 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         elif cmd == 'help':
              c.privmsg(self.channel, 'poll, disspoll, endpoll, vote, peopleschoices, fav_artist, playing. tumblr, tweet, joke, game, title, schedule')
 
+        elif cmd == 'feeling':
+            headers= { 'Client-ID':self.client_id}
+            spot_url='https://api.twitch.tv/helix/streams?user_login=plonatasven'
+            rrrr=requests.get(spot_url, headers=headers).json()
+            #print(rrrr)
+            self.check=rrrr['data'][0]['thumbnail_url']
+            print(self.check)
+            self.check=self.check.replace('{width}x{height}','1900x1200')
+            print(self.check)
+            headers = {
+                'Content-Type': 'application/json',
+                'Ocp-Apim-Subscription-Key': '57cb906ff1744997ab644e73c21c67dd',
+            }
+            params = urllib.urlencode({
+            })
+            body = "{ 'url': '"
+            body+=self.check
+            body+="'}"
+            #print(body)
+            conn = httplib.HTTPSConnection('westus.api.cognitive.microsoft.com')
+            conn.request("POST", "/emotion/v1.0/recognize?%s" % params, body, headers)
+            response = conn.getresponse()
+            data = response.read()
+            #print data
+            s = data.decode("utf-8") 
+            s.replace("'b","")
+            small = (s[s.find("scores"):])  
+            l = small.split(',')
+            l[-1] = l[-1][:l[-1].find("}")]
+            nums = []
+            for i in l:
+                #print(i[i.rfind(":")+1:])
+                nums.append(float(i[i.rfind(":")+1:]))
+            #print(nums)
+            countcount=0
+            for n in nums:
+                if (n > 0.9):
+                    c.privmsg(self.channel, "The streamer is " + self.emotion(countcount))
+                else:
+                    countcount+=1
+            conn.close()
+           # c.privmsg(self.channel,+)
         else:
             c.privmsg(self.channel, "Did not understand command: " + cmd)
+        
+
 
 def main():
     bot = TwitchBot(cfg.username, cfg.client_id, cfg.token, cfg.channel)
