@@ -1,5 +1,9 @@
 ## Welcome to our Social Streamer bot
 
+### What this is:
+
+This chatbot allows you to uses simple commands to get information from your favorite social media. It also allows the option of voting for what song to play and the power to veto the song. In addition, it also pulls data from Spotify to show what is currently playing. Last but not least, it uses cognitive analytics to determine the emotion of the streamer and the text being sent in chat. 
+
 ### Necessary information  
 1. Username - The username of the ChatBot
 2. Client ID - Your registered application's Client ID to allow API calls by the bot  
