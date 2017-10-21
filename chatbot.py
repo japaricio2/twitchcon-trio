@@ -8,6 +8,7 @@ Licensed under the Apache License, Version 2.0 (the "License"). You may not use 
 or in the "license" file accompanying this file. This file is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
 '''
 
+import cfg
 import sys
 import irc.bot
 import requests
@@ -28,8 +29,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         server = 'irc.chat.twitch.tv'
         port = 6667
         print('Connecting to ' + server + ' on port ' + str(port) + '...')
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:'+token)], username, username)
-        
+        irc.bot.SingleServerIRCBot.__init__(self, [(server, port, token)], username, username)
 
     def on_welcome(self, c, e):
         print('Joining ' + self.channel)
@@ -41,7 +41,6 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         c.join(self.channel)
 
     def on_pubmsg(self, c, e):
-
         # If a chat message starts with an exclamation point, try to run it as a command
         if e.arguments[0][:1] == '!':
             cmd = e.arguments[0].split(' ')[0][1:]
@@ -57,7 +56,10 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
             headers = {'Client-ID': self.client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
             r = requests.get(url, headers=headers).json()
-            c.privmsg(self.channel, r['display_name'] + ' is currently playing ' + r['game'])
+            if r['game'] is None:
+                c.privmsg(self.channel, "There is no game currently being played.")
+            else:
+                c.privmsg(self.channel, r['display_name'] + ' is currently playing ' + r['game'])
 
         # Poll the API the get the current status of the stream
         elif cmd == "title":
@@ -71,7 +73,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             message = "This is an example bot, replace this text with your raffle text."
             c.privmsg(self.channel, message)
         elif cmd == "schedule":
-            message = "This is an example bot, replace this text with your schedule text."            
+            message = "This is an example bot, replace this text with your schedule text."
             c.privmsg(self.channel, message)
         elif cmd == "spotify_current":
             # make request to spotify api
@@ -80,7 +82,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             r = requests.get(url, headers=headers).json()
             display_name = (r['display_name'])
             # print("DISPLAY " + display_name)
-            
+
             spot_url = 'https://api.spotify.com/v1/me/top/artists?limit=5'
             headers = {
                 'Accept': 'application/json',
@@ -94,16 +96,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             c.privmsg(self.channel, "Did not understand command: " + cmd)
 
 def main():
-    if len(sys.argv) != 5:
-        print("Usage: twitchbot <username> <client id> <token> <channel>")
-        sys.exit(1)
-
-    username  = sys.argv[1]
-    client_id = sys.argv[2]
-    token     = sys.argv[3]
-    channel   = sys.argv[4]
-
-    bot = TwitchBot(username, client_id, token, channel)
+    bot = TwitchBot(cfg.username, cfg.client_id, cfg.token, cfg.channel)
     bot.start()
 
 if __name__ == "__main__":
