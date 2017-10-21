@@ -19,13 +19,14 @@ import pytumblr
 
 #pip install python-twitter, pytumblr, irc
 
+oauth = 'BQCBrKU0SZB9ct-7LmV0mPG2DXIb_uZyBPeo1XYwd1ro2NZgxSsDPYliW5ZkqTzTurqg6cu9Fwe0OTSMaIajvc4eJZCFx6YtaNk8bPGxXL2HcHrrjmVjGO_U568Gs5cTxWa1BYxYNqsEziFEpYXJ3FLDfeTqFXrgJzUNfEmrrfUwOrDvO725zFwxQUIiT4m4y4cbbxArJpwVdEhXbwTLus4okrwkiARE4CQnJFqBzLH08S5cy9IC0PqR97ccLVGlUR_MPN_5qtqlGdT-ZvgTh5D7Ez09WcqD3P6qb8K_ipM5sw'
+
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, client_id, token, channel):
         self.client_id = client_id
         self.token = token
         self.channel = '#' + channel
         ##VOTING
-
         global table
         global winner
 
@@ -146,7 +147,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
           precursor='spotify%3Atrack%3A'
           headers = {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+                'Authorization': 'Bearer ' + oauth,
           }
           rr = requests.get(spot_url, headers=headers).json()
           precursor+=rr['tracks']['items'][0]['id']
@@ -159,11 +160,17 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?limit=10'
             headers = {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+                'Authorization': 'Bearer ' + oauth,
             }
             rr = requests.get(spot_url, headers=headers).json()
             c.privmsg(self.channel, 'This playlist contains:')
-            c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
+            count=0
+            while True:
+                if(count>1):
+                    break
+                else:
+                    c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
+                    count += 1
 
         #tumblr post Lol
         elif cmd == "tumblr":
@@ -216,7 +223,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             spot_url = 'https://api.spotify.com/v1/me/top/artists?limit=5'
             headers = {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+                'Authorization': 'Bearer ' + oauth,
             }
             rr = requests.get(spot_url, headers=headers).json()
             artist = rr['items'][0]['name']
@@ -228,7 +235,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             spot_url = 'https://api.spotify.com/v1/me/player/currently-playing'
             headers = {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+                'Authorization': 'Bearer ' + oauth,
             }
             r = requests.get(spot_url, headers=headers).json()
             #print(r)
