@@ -95,7 +95,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             time.sleep(5)
             c.privmsg(self.channel, self.followup(intt))
         # Poll Twitter Api for last tweet (hardcode)
-        if cmd=="tweet":
+        elif cmd=="tweet":
             latest_tweet = self.api.GetUserTimeline(screen_name='aspceo')
             c.privmsg(self.channel, latest_tweet[0].text)
 
