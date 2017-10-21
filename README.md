@@ -2,11 +2,11 @@
 
 ### Necessary information  
 1. Username - The username of the ChatBot
-2. Client ID - Your registered application's Client ID to allow API calls by the bot
-  --- Register your App and grab the client ID to make calls to the API
-  --- [Click here to get your client ID](https://dev.twitch.tv/dashboard/apps)
-3. Token - Your OAuth Token
-  --- [Head here to get your Twitch OAuth](https://twitchapps.com/tmi/)
+2. Client ID - Your registered application's Client ID to allow API calls by the bot  
+         - Register your App and grab the client ID to make calls to the API  
+         - [Click here to get your client ID](https://dev.twitch.tv/dashboard/apps)  
+3. Token - Your OAuth Token  
+         - [Head here to get your Twitch OAuth](https://twitchapps.com/tmi/)  
 4. Channel - The channel your bot will connect to
 
 ### Installation  
