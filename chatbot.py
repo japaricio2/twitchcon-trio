@@ -17,7 +17,7 @@ import random
 import time
 import pytumblr
 
-#pip install python-twitter, pytumblr
+#pip install python-twitter, pytumblr, irc
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, client_id, token, channel):
@@ -25,7 +25,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         self.token = token
         self.channel = '#' + channel
         ##VOTING
-        
+
         global table
         global winner
 
@@ -52,8 +52,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         port = 6667
         print('Connecting to ' + server + ' on port ' + str(port) + '...')
         irc.bot.SingleServerIRCBot.__init__(self, [(server, port, token)], username, username)
-        irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:'+token)], username, username)
-        
+
     @staticmethod
     def first(x):
       return {
@@ -114,12 +113,12 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         if cmd == "poll":
           self.table={e.arguments[0].split(' ')[1]: 0,
             e.arguments[0].split(' ')[2]:0,}
-        
+
         #displays curret poll results
         elif cmd == "disppoll":
           for key,value in self.table.items():
             c.privmsg(self.channel, key+' score: '+str(value))
-        
+
         #allows for voting increments by one
         elif cmd == "vote":
           for key,value in self.table.items():
@@ -146,31 +145,28 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
           spot_url+='&type=track'
           precursor='spotify%3Atrack%3A'
           headers = {
-                          'Accept': 'application/json',
-                          'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
-                      }
+                'Accept': 'application/json',
+                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+          }
           rr = requests.get(spot_url, headers=headers).json()
           precursor+=rr['tracks']['items'][0]['id']
           spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?uris='+precursor
           rr = requests.post(spot_url, headers=headers)
           c.privmsg(self.channel, 'Poll is over and the song has been added to the People\'s choice playlist.')
 
-        elif cmd=="resetpoll":
-        ##tbd, the poll command actually wipes out the old infor for us anyways
-
         #checks playlist that's been created by the poll
-        elif cmd=="peopleschoices":
-          spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?limit=10'
-          headers = {
-                          'Accept': 'application/json',
-                          'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
-                      }
-          rr = requests.get(spot_url, headers=headers).json()
-          c.privmsg(self.channel, 'This playlist contains:')
-          c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
+        elif cmd == "peopleschoices":
+            spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?limit=10'
+            headers = {
+                'Accept': 'application/json',
+                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+            }
+            rr = requests.get(spot_url, headers=headers).json()
+            c.privmsg(self.channel, 'This playlist contains:')
+            c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
 
         #tumblr post Lol
-        elif cmd== "tumblr":
+        elif cmd == "tumblr":
             tumblr=self.tum_client.posts('qualitymemetonite.tumblr.com', type='text')
             c.privmsg(self.channel, 'Recent post: '+' \"'+tumblr['posts'][0]['body']+'\"')
 
@@ -182,7 +178,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             c.privmsg(self.channel, self.followup(intt))
 
         # Poll Twitter Api for last tweet (hardcode)
-        elif cmd=="tweet":
+        elif cmd == "tweet":
             latest_tweet = self.api.GetUserTimeline(screen_name='aspceo')
             c.privmsg(self.channel, latest_tweet[0].text)
 
@@ -220,7 +216,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             spot_url = 'https://api.spotify.com/v1/me/top/artists?limit=5'
             headers = {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer BQC9TDED6Er5JOftJyFPliUVFHjlbrdfrfVLqyRoI8kIseYjxcGw047Ms6vD1IB9nenRXp9TwAEB6ZOTqf7dhNb1zITnDTo9N0AJTMeDHlBCWqDXw8aBqxc3a7lTw4l8Nv7CnPmYr20cVsHDDnc',
+                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
             }
             rr = requests.get(spot_url, headers=headers).json()
             artist = rr['items'][0]['name']
@@ -232,7 +228,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             spot_url = 'https://api.spotify.com/v1/me/player/currently-playing'
             headers = {
                 'Accept': 'application/json',
-                'Authorization': 'Bearer BQBuI97W8oZQRykDe_n_oD2ND1l5MlgtEbBPT__nxtQYmxRBatbydIMX51PqTG8bRQDC4iCu1p39qtkHzQn6iV5EEuaBasNNXjIU5dVJKHQGrJGi-KRLWIkvfslHJZuzN6RN9YHXzhQLcin__dcJ3VUMcza09A',
+                'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
             }
             r = requests.get(spot_url, headers=headers).json()
             #print(r)
