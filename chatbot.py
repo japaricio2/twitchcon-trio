@@ -14,8 +14,9 @@ import requests
 import twitter
 import random
 import time
+import pytumblr
 
-#pip install python-twitter
+#pip install python-twitter, pytumblr
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, client_id, token, channel):
@@ -27,6 +28,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         consumer_secret = 'WxVCkxLyDKIFgRW1Jm1TRf3Q7Ec7WS4Or7iSBOf8Fo9Pj4GvE8'
         access_token_key = '239036830-2NL2MhgnUZo69LRU2SLUECGgrH16EFgXSp9woUIU'
         access_token_secret = 'I3aEJSFGclBQgNupBpFF9zO6H98wQnghtpgrF4SQxGvUJ'
+        self.tum_client = pytumblr.TumblrRestClient('7YCVkGyrnGNqAwuNKPtCnydkKBqKHnRs15yfITEakp9snPIObg')
         self.api = twitter.Api(
           consumer_key=consumer_key,
           consumer_secret=consumer_secret,
@@ -88,8 +90,12 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def do_command(self, e, cmd):
         c = self.connection
+        #tumblr post Lol
+        if cmd== "tumblr":
+            tumblr=self.tum_client.posts('qualitymemetonite.tumblr.com', type='text')
+            c.privmsg(self.channel, 'Recent post: '+' \"'+tumblr['posts'][0]['body']+'\"')
         # Funny Jokes haHaa
-        if cmd == "joke":
+        elif cmd == "joke":
             intt=random.randint(1,7)
             c.privmsg(self.channel, self.first(intt))
             time.sleep(5)
