@@ -91,7 +91,19 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             cmd = e.arguments[0].split(' ')[0][1:]
             print('Received command: ' + cmd)
             self.do_command(e, cmd)
+        elif 'gonna' in e.arguments[0]:
+            cmd = 'gonna'
+            #print(cmd)
+            self.insideJoke(e, cmd)
+        elif 'going' in e.arguments[0]:
+            cmd = 'going'
+            #print(cmd)
+            self.insideJoke(e, cmd)
         return
+
+    def insideJoke(self, e, cmd):
+        c = self.connection
+        c.privmsg(self.channel, "bet you won't.")
 
     def do_command(self, e, cmd):
         c = self.connection
@@ -141,7 +153,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
           rr = requests.post(spot_url, headers=headers)
           c.privmsg(self.channel, 'Poll is over and the song has been added to the People\'s choice playlist.')
 
-        elif cmd=="resetpoll":
+        #elif cmd=="resetpoll":
         ##tbd, the poll command actually wipes out the old infor for us anyways
 
         #checks playlist that's been created by the poll
@@ -230,24 +242,6 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 c.privmsg(self.channel, song + ' - ' + artist + ' is now playing')
             else:
                 c.privmsg(self.channel, 'There is nothing currently being played.')
-
-        elif cmd == "spotify_current":
-            # make request to spotify api
-            url = 'https://api.twitch.tv/kraken/channels/' + self.channel_id
-            headers = {'Client-ID': self.client_id, 'Accept': 'application/vnd.twitchtv.v5+json'}
-            r = requests.get(url, headers=headers).json()
-            display_name = (r['display_name'])
-            # print("DISPLAY " + display_name)
-            
-            spot_url = 'https://api.spotify.com/v1/me/top/artists?limit=5'
-            headers = {
-                'Accept': 'application/json',
-                'Authorization': 'Bearer BQC9TDED6Er5JOftJyFPliUVFHjlbrdfrfVLqyRoI8kIseYjxcGw047Ms6vD1IB9nenRXp9TwAEB6ZOTqf7dhNb1zITnDTo9N0AJTMeDHlBCWqDXw8aBqxc3a7lTw4l8Nv7CnPmYr20cVsHDDnc',
-            }
-            rr = requests.get(spot_url, headers=headers).json()
-            artist = rr['items'][0]['name']
-            message = display_name + ' favorite artist is ' + artist
-            c.privmsg(self.channel, message)
         else:
             c.privmsg(self.channel, "Did not understand command: " + cmd)
 
