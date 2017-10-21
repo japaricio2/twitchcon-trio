@@ -95,19 +95,24 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def do_command(self, e, cmd):
         c = self.connection
+
+        #starts poll
         if cmd == "poll":
           self.table={e.arguments[0].split(' ')[1]: 0,
             e.arguments[0].split(' ')[2]:0,}
-
+        
+        #displays curret poll results
         elif cmd == "disppoll":
           for key,value in self.table.items():
             c.privmsg(self.channel, key+' score: '+str(value))
-          
+        
+        #allows for voting increments by one
         elif cmd == "vote":
           for key,value in self.table.items():
             if(e.arguments[0].split(' ')[1]==key):
               self.table[key]+=1
-        
+
+        #ends poll
         elif cmd=="endpoll":
           dont_stop_me=[]
           dont_help_me=[]
@@ -135,6 +140,17 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
           spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?uris='+precursor
           rr = requests.post(spot_url, headers=headers)
           c.privmsg(self.channel, 'Poll is over and the song has been added to the People\'s choice playlist.')
+
+        #checks playlist that's been created by the poll
+        elif cmd=="peopleschoices":
+          spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?limit=10'
+          headers = {
+                          'Accept': 'application/json',
+                          'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+                      }
+          rr = requests.get(spot_url, headers=headers).json()
+          c.privmsg(self.channel, 'This playlist contains:')
+          c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
 
         #tumblr post Lol
         elif cmd== "tumblr":
