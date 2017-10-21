@@ -165,7 +165,14 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                       }
           rr = requests.get(spot_url, headers=headers).json()
           c.privmsg(self.channel, 'This playlist contains:')
-          c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
+          count=0
+          while True:
+            if(count>1):
+                break
+            else:
+                c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
+                count+=1
+            
 
         #tumblr post Lol
         elif cmd== "tumblr":
