@@ -11,6 +11,9 @@ or in the "license" file accompanying this file. This file is distributed on an 
 import sys
 import irc.bot
 import requests
+import twitter
+
+#pip install python-twitter
 
 class TwitchBot(irc.bot.SingleServerIRCBot):
     def __init__(self, username, client_id, token, channel):
