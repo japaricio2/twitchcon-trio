@@ -248,6 +248,9 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
             else:
                 c.privmsg(self.channel, 'There is nothing currently being played.')
 
+        elif cmd == 'help':
+             c.privmsg(self.channel, 'poll, disspoll, endpoll, vote, peopleschoices, fav_artist, playing. tumblr, tweet, joke, game, title, schedule')
+             
         else:
             c.privmsg(self.channel, "Did not understand command: " + cmd)
 
