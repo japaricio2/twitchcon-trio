@@ -12,6 +12,8 @@ import sys
 import irc.bot
 import requests
 import twitter
+import random
+import time
 
 #pip install python-twitter
 
@@ -43,6 +45,28 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         print('Connecting to ' + server + ' on port ' + str(port) + '...')
         irc.bot.SingleServerIRCBot.__init__(self, [(server, port, 'oauth:'+token)], username, username)
         
+    @staticmethod
+    def first(x):
+      return {
+          1: 'I told a Hawaiian a joke that wasn\'t very funny',
+          2: 'The tenth Fast and Furious movie should be called-',
+          3: 'What is Romeo and Juliet\'s least favorite fruit?',
+          4: 'I bought a shirt with corn printed all over it.',
+          5: 'Any salad can be a Caesar salad-',
+          6: 'When are plants awake?',
+          7: 'I gave a flower to a cowboy-',
+      }[x]
+    @staticmethod
+    def followup(x):
+      return {
+          1: 'He responded with a low \"ha\"',
+          2: 'Fast 10: Your Seat belts',
+          3: 'Can\'t-elope.',
+          4: 'It was a crop top.',
+          5: 'if you stab it enough.',
+          6: 'At tree am',
+          7: 'He said \'what in carnation?\'',
+      }[x]
 
     def on_welcome(self, c, e):
         print('Joining ' + self.channel)
@@ -64,6 +88,12 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def do_command(self, e, cmd):
         c = self.connection
+        # Funny Jokes haHaa
+        if cmd == "joke":
+            intt=random.randint(1,7)
+            c.privmsg(self.channel, self.first(intt))
+            time.sleep(5)
+            c.privmsg(self.channel, self.followup(intt))
         # Poll Twitter Api for last tweet (hardcode)
         if cmd=="tweet":
             latest_tweet = self.api.GetUserTimeline(screen_name='aspceo')
