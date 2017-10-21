@@ -23,6 +23,11 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         self.client_id = client_id
         self.token = token
         self.channel = '#' + channel
+        ##VOTING
+        
+        global table
+        global winner
+
         #twitter INIT
         consumer_key = 'mj9lFkDA55M8yRfXRotDfiEt6'
         consumer_secret = 'WxVCkxLyDKIFgRW1Jm1TRf3Q7Ec7WS4Or7iSBOf8Fo9Pj4GvE8'
@@ -90,16 +95,59 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
     def do_command(self, e, cmd):
         c = self.connection
+        if cmd == "poll":
+          self.table={e.arguments[0].split(' ')[1]: 0,
+            e.arguments[0].split(' ')[2]:0,}
+
+        elif cmd == "disppoll":
+          for key,value in self.table.items():
+            c.privmsg(self.channel, key+' score: '+str(value))
+          
+        elif cmd == "vote":
+          for key,value in self.table.items():
+            if(e.arguments[0].split(' ')[1]==key):
+              self.table[key]+=1
+        
+        elif cmd=="endpoll":
+          dont_stop_me=[]
+          dont_help_me=[]
+          for key,value in self.table.items():
+            list.append(dont_help_me,key)
+            list.append(dont_stop_me,value)
+          if(dont_stop_me[0]<dont_stop_me[1]):
+            self.winner=dont_help_me[1]
+            temp=dont_stop_me[1]
+            dont_stop_me[1]=dont_stop_me[0]
+            dont_stop_me[0]=temp
+          else:
+            self.winner=dont_help_me[0]
+          self.winner.replace(" ","+")
+          spot_url ='https://api.spotify.com/v1/search?q='
+          spot_url+=self.winner
+          spot_url+='&type=track'
+          precursor='spotify%3Atrack%3A'
+          headers = {
+                          'Accept': 'application/json',
+                          'Authorization': 'Bearer BQAXEm-BZJvlrWqvZcVHOdi8-DLJM1nItg3UQ2IYUkBebZpfWGBl1Wt7cYgpu1d54kilbTa5R7crnISzOf2Rs1tkQw7gDgrmGNThb-sDdHhOn7bBsqkw_bX459Z2tkqT_FvCGFLKKacQfSao66jxsae8NaguhyL57dgvhgMDjHJFlckDTji6XqkY7QL2AWyA-CEjGEci0y2pWnhAjgh1EZFP9P7IyOI4plkE9qz_uoGSjwI-oQ',
+                      }
+          rr = requests.get(spot_url, headers=headers).json()
+          precursor+=rr['tracks']['items'][0]['id']
+          spot_url='https://api.spotify.com/v1/users/1110278844/playlists/0wRv1nnXQKKib6TBd1dTY0/tracks?uris='+precursor
+          rr = requests.post(spot_url, headers=headers)
+          c.privmsg(self.channel, 'Poll is over and the song has been added to the People\'s choice playlist.')
+
         #tumblr post Lol
-        if cmd== "tumblr":
+        elif cmd== "tumblr":
             tumblr=self.tum_client.posts('qualitymemetonite.tumblr.com', type='text')
             c.privmsg(self.channel, 'Recent post: '+' \"'+tumblr['posts'][0]['body']+'\"')
+
         # Funny Jokes haHaa
         elif cmd == "joke":
             intt=random.randint(1,7)
             c.privmsg(self.channel, self.first(intt))
             time.sleep(5)
             c.privmsg(self.channel, self.followup(intt))
+
         # Poll Twitter Api for last tweet (hardcode)
         elif cmd=="tweet":
             latest_tweet = self.api.GetUserTimeline(screen_name='aspceo')
