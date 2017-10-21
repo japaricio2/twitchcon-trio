@@ -29,7 +29,8 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
         ##VOTING
         global table
         global winner
-
+        global skipskip
+        self.skipskip=0
         #twitter INIT
         consumer_key = 'mj9lFkDA55M8yRfXRotDfiEt6'
         consumer_secret = 'WxVCkxLyDKIFgRW1Jm1TRf3Q7Ec7WS4Or7iSBOf8Fo9Pj4GvE8'
@@ -171,12 +172,24 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
                 else:
                     c.privmsg(self.channel, rr['items'][0]['track']['name']+ ' by '+ rr['items'][0]['track']['artists'][0]['name'])
                     count += 1
-
+                    
+        #skip function
+        elif cmd == "skip":
+            self.skipskip+=1
+            if(self.skipskip>4):
+                spot_url = 'https://api.spotify.com/v1/me/player/next'
+                headers = {
+                    'Accept': 'application/json',
+                    'Authorization': 'Bearer ' + oauth,
+                }
+                rr = requests.post(spot_url, headers=headers)
+                self.skipskip=0
+        
         #tumblr post Lol
         elif cmd == "tumblr":
             tumblr=self.tum_client.posts('qualitymemetonite.tumblr.com', type='text')
             c.privmsg(self.channel, 'Recent post: '+' \"'+tumblr['posts'][0]['body']+'\"')
-
+        
         # Funny Jokes haHaa
         elif cmd == "joke":
             intt=random.randint(1,7)
@@ -250,7 +263,7 @@ class TwitchBot(irc.bot.SingleServerIRCBot):
 
         elif cmd == 'help':
              c.privmsg(self.channel, 'poll, disspoll, endpoll, vote, peopleschoices, fav_artist, playing. tumblr, tweet, joke, game, title, schedule')
-             
+
         else:
             c.privmsg(self.channel, "Did not understand command: " + cmd)
 
